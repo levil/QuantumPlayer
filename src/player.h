@@ -44,11 +44,14 @@ public slots:
 
 private slots:
     void handlePlayPause();
+    void handleStop();
 
 private:
     void initConnections();
     void initActions();
     void initGui();
+
+    void changePlayPause(bool showPlay);
 
     Phonon::VideoPlayer *vp;
 

@@ -18,6 +18,7 @@
 #include <Phonon/MediaSource>
 #include <Phonon/MediaObject>
 #include <Phonon/SeekSlider>
+#include <Phonon/VolumeSlider>
 
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolBar>
@@ -38,16 +39,20 @@ void Player::initConnections()
 {
     connect(vp, SIGNAL(finished()), vp, SLOT(deleteLater()));
     connect(playPauseAction, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
-    connect(stopAction, SIGNAL(triggered()), vp, SLOT(stop()));
+    connect(stopAction, SIGNAL(triggered()), this, SLOT(handleStop()));
 }
 
 void Player::initActions()
 {
     playPauseAction = new QAction(QIcon::fromTheme("media-playback-start"), tr("Play"), this);
     playPauseAction->setEnabled(false);
+    QList<QKeySequence> playPauseShortcuts;
+    playPauseShortcuts << QKeySequence(Qt::Key_MediaPlay) << QKeySequence(Qt::Key_Space);
+    playPauseAction->setShortcuts(playPauseShortcuts);
 
     stopAction = new QAction(QIcon::fromTheme("media-playback-stop"), tr("Stop"), this);
     stopAction->setEnabled(false);
+    stopAction->setShortcut(QKeySequence(Qt::Key_MediaStop));
 }
 
 void Player::initGui()
@@ -55,10 +60,13 @@ void Player::initGui()
     vp = new Phonon::VideoPlayer(Phonon::VideoCategory);
 
     Phonon::SeekSlider *seekSlider = new Phonon::SeekSlider(vp->mediaObject());
+    Phonon::VolumeSlider *volumeSlider = new Phonon::VolumeSlider(vp->audioOutput());
+    volumeSlider->setMaximumWidth(100);
 
     controlBar = new QToolBar;
     controlBar->addAction(playPauseAction);
     controlBar->addAction(stopAction);
+    controlBar->addWidget(volumeSlider);
     controlBar->addWidget(seekSlider);
 
     vLayout = new QVBoxLayout;
@@ -78,12 +86,27 @@ void Player::handlePlayPause()
 {
     if (vp->isPlaying()) {
         vp->pause();
+        changePlayPause(true);
+    } else {
+        vp->play();
+        changePlayPause(false);
+        stopAction->setEnabled(true);
+    }
+}
+
+void Player::handleStop()
+{
+    vp->stop();
+    changePlayPause(true);
+}
+
+void Player::changePlayPause(bool showPlay)
+{
+    if (showPlay) {
         playPauseAction->setIcon(QIcon::fromTheme("media-playback-start"));
         playPauseAction->setText(tr("Play"));
     } else {
-        vp->play();
         playPauseAction->setIcon(QIcon::fromTheme("media-playback-pause"));
-        playPauseAction->setText(tr("Pause"));
-        stopAction->setEnabled(true);
+        playPauseAction->setText(tr("Play"));
     }
 }

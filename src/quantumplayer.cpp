@@ -56,9 +56,9 @@ void QuantumPlayer::initMenus()
 void QuantumPlayer::initActions()
 {
     actionOpen = new QAction(QIcon::fromTheme("document-open"), tr("&Open"), this);
-    actionOpen->setShortcut(QKeySequence("Ctrl+O"));
+    actionOpen->setShortcut(QKeySequence::Open);
     actionQuit = new QAction(QIcon::fromTheme("application-exit"), tr("&Quit"), this);
-    actionQuit->setShortcut(QKeySequence("Ctrl+Q"));
+    actionQuit->setShortcut(QKeySequence::Quit);
 
     actionAboutQt = new QAction(tr("About &Qt"), this);
 }
