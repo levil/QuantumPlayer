@@ -37,7 +37,6 @@ Player::Player(QWidget *parent) :
 
 void Player::initConnections()
 {
-    connect(vp, SIGNAL(finished()), vp, SLOT(deleteLater()));
     connect(vp, SIGNAL(finished()), this, SIGNAL(playerFinished()));
 
     connect(playPauseAction, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
