@@ -38,6 +38,8 @@ Player::Player(QWidget *parent) :
 void Player::initConnections()
 {
     connect(vp, SIGNAL(finished()), vp, SLOT(deleteLater()));
+    connect(vp, SIGNAL(finished()), this, SIGNAL(playerFinished()));
+
     connect(playPauseAction, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
     connect(stopAction, SIGNAL(triggered()), this, SLOT(handleStop()));
 }
@@ -80,6 +82,15 @@ void Player::loadMedia(const QString &mediaUrl)
 {
     vp->load(mediaUrl);
     playPauseAction->setEnabled(true);
+}
+
+void Player::play(const QString &mediaUrl)
+{
+    if (vp->isPlaying())
+        handleStop();
+
+    loadMedia(mediaUrl);
+    handlePlayPause();
 }
 
 void Player::handlePlayPause()

@@ -21,6 +21,8 @@
 #include <QMainWindow>
 
 class Player;
+class PlaylistWidget;
+
 class QAction;
 
 class QuantumPlayer : public QMainWindow
@@ -43,10 +45,12 @@ private:
     void initConnections();
 
     Player *player;
+    PlaylistWidget *playlistWidget;
 
     QAction *actionOpen;
     QAction *actionQuit;
     QAction *actionAboutQt;
+
 };
 
 #endif // QUANTUMPLAYER_H

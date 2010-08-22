@@ -18,6 +18,7 @@
 #include <QtGui>
 
 #include "quantumplayer.h"
+#include "playlistwidget.h"
 #include "player.h"
 
 QuantumPlayer::QuantumPlayer(QWidget *parent) :
@@ -34,6 +35,12 @@ void QuantumPlayer::initGui()
     player = new Player();
     setCentralWidget(player);
     setGeometry(100, 100, 800, 600);
+
+    QDockWidget *playlistDock = new QDockWidget(tr("Playlist"), this);
+    playlistDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    playlistWidget = new PlaylistWidget(playlistDock);
+    playlistDock->setWidget(playlistWidget);
+    addDockWidget(Qt::LeftDockWidgetArea, playlistDock);
 
     setWindowTitle(qApp->applicationName());
 }
@@ -68,6 +75,9 @@ void QuantumPlayer::initConnections()
     connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(actionOpen, SIGNAL(triggered()), this, SLOT(handleOpen()));
     connect(actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+    connect(playlistWidget, SIGNAL(videoChanged(QString)), player, SLOT(play(QString)));
+    connect(player, SIGNAL(playerFinished()), playlistWidget, SLOT(nextVideo()));
 }
 
 void QuantumPlayer::handleOpen()

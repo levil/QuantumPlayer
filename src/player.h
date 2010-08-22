@@ -38,9 +38,11 @@ public:
     QAction *actionPlayPause() const { return playPauseAction; };
     QAction *actionStop() const { return stopAction; };
 signals:
+    void playerFinished();
 
 public slots:
     void loadMedia(const QString &mediaUrl);
+    void play(const QString &mediaUrl);
 
 private slots:
     void handlePlayPause();

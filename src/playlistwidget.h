@@ -20,6 +20,11 @@
 
 #include <QWidget>
 
+class QAction;
+class QListView;
+class QStringListModel;
+class QModelIndex;
+
 class PlaylistWidget : public QWidget
 {
 Q_OBJECT
@@ -27,9 +32,29 @@ public:
     explicit PlaylistWidget(QWidget *parent = 0);
 
 signals:
+    void videoChanged(const QString &mediaUrl);
 
 public slots:
+    void add(const QStringList &mediaUrls);
+    void add(const QString &mediaUrl);
+    void add();
 
+    void previousVideo();
+    void nextVideo();
+
+private slots:
+    void fileDoubleClicked(const QModelIndex &index);
+
+private:
+    void initGui();
+    void initActions();
+    void initConnections();
+
+    QAction *actionAdd;
+    QAction *actionRemove;
+
+    QListView *playlistView;
+    QStringListModel *playlistModel;
 };
 
 #endif // PLAYLISTWIDGET_H
