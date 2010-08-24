@@ -36,7 +36,7 @@ void QuantumPlayer::initGui()
     setCentralWidget(player);
     setGeometry(100, 100, 800, 600);
 
-    QDockWidget *playlistDock = new QDockWidget(tr("Playlist"), this);
+    playlistDock = new QDockWidget(tr("Playlist"), this);
     playlistDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     playlistWidget = new PlaylistWidget(playlistDock);
     playlistDock->setWidget(playlistWidget);
@@ -53,8 +53,8 @@ void QuantumPlayer::initMenus()
     fileMenu->addAction(actionQuit);
 
     QMenu *playbackMenu = menuBar()->addMenu(tr("&Playback"));
-    playbackMenu->addAction(player->actionPlayPause());
-    playbackMenu->addAction(player->actionStop());
+    playbackMenu->addAction(player->playPauseAct());
+    playbackMenu->addAction(player->stopAct());
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(actionAboutQt);
@@ -78,6 +78,12 @@ void QuantumPlayer::initConnections()
 
     connect(playlistWidget, SIGNAL(videoChanged(QString)), player, SLOT(play(QString)));
     connect(player, SIGNAL(playerFinished()), playlistWidget, SLOT(nextVideo()));
+    connect(player, SIGNAL(skipBackward()), playlistWidget, SLOT(previousVideo()));
+    connect(player, SIGNAL(skipForward()), playlistWidget, SLOT(nextVideo()));
+
+    connect(player, SIGNAL(toggleFullScreen(bool)), this, SLOT(changeFullScreen(bool)));
+
+    connect(playlistWidget, SIGNAL(playlistChanged()), this, SLOT(handlePlaylistChange()));
 }
 
 void QuantumPlayer::handleOpen()
@@ -92,4 +98,21 @@ void QuantumPlayer::handleOpen()
 
     setWindowFilePath(fileUrl);
     player->loadMedia(fileUrl);
+}
+
+void QuantumPlayer::changeFullScreen(bool fullScreen)
+{
+    menuBar()->setVisible(!fullScreen);
+    playlistDock->setVisible(!fullScreen);
+    if (fullScreen)
+        showFullScreen();
+    else
+        showNormal();
+}
+
+void QuantumPlayer::handlePlaylistChange()
+{
+    player->setPlayEnabled(!playlistWidget->isEmpty());
+    player->setSkipBackwardEnabled(playlistWidget->hasPrevious());
+    player->setSkipForwardEnabled(playlistWidget->hasNext());
 }

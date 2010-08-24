@@ -31,8 +31,13 @@ Q_OBJECT
 public:
     explicit PlaylistWidget(QWidget *parent = 0);
 
+    bool hasNext() const;
+    bool hasPrevious() const;
+    bool isEmpty() const;
+
 signals:
     void videoChanged(const QString &mediaUrl);
+    void playlistChanged();
 
 public slots:
     void add(const QStringList &mediaUrls);

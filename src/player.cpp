@@ -39,21 +39,34 @@ void Player::initConnections()
 {
     connect(vp, SIGNAL(finished()), this, SIGNAL(playerFinished()));
 
-    connect(playPauseAction, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
-    connect(stopAction, SIGNAL(triggered()), this, SLOT(handleStop()));
+    connect(actionPlayPause, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
+    connect(actionStop, SIGNAL(triggered()), this, SLOT(handleStop()));
+    connect(actionToggleFullscreen, SIGNAL(toggled(bool)), this, SIGNAL(toggleFullScreen(bool)));
+    connect(actionSkipBackward, SIGNAL(triggered()), this, SIGNAL(skipBackward()));
+    connect(actionSkipForward, SIGNAL(triggered()), this, SIGNAL(skipForward()));
 }
 
 void Player::initActions()
 {
-    playPauseAction = new QAction(QIcon::fromTheme("media-playback-start"), tr("Play"), this);
-    playPauseAction->setEnabled(false);
+    actionPlayPause = new QAction(QIcon::fromTheme("media-playback-start"), tr("Play"), this);
+    actionPlayPause->setEnabled(false);
     QList<QKeySequence> playPauseShortcuts;
     playPauseShortcuts << QKeySequence(Qt::Key_MediaPlay) << QKeySequence(Qt::Key_Space);
-    playPauseAction->setShortcuts(playPauseShortcuts);
+    actionPlayPause->setShortcuts(playPauseShortcuts);
 
-    stopAction = new QAction(QIcon::fromTheme("media-playback-stop"), tr("Stop"), this);
-    stopAction->setEnabled(false);
-    stopAction->setShortcut(QKeySequence(Qt::Key_MediaStop));
+    actionStop = new QAction(QIcon::fromTheme("media-playback-stop"), tr("Stop"), this);
+    actionStop->setEnabled(false);
+    actionStop->setShortcut(QKeySequence(Qt::Key_MediaStop));
+
+    actionSkipBackward = new QAction(QIcon::fromTheme("media-skip-backward"), tr("Skip backward"), this);
+    actionSkipBackward->setEnabled(false);
+
+    actionSkipForward = new QAction(QIcon::fromTheme("media-skip-forward"), tr("Skip forward"), this);
+    actionSkipForward->setEnabled(false);
+
+    actionToggleFullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("Fullscreen"), this);
+    actionToggleFullscreen->setCheckable(true);
+    actionToggleFullscreen->setChecked(false);
 }
 
 void Player::initGui()
@@ -65,10 +78,13 @@ void Player::initGui()
     volumeSlider->setMaximumWidth(100);
 
     controlBar = new QToolBar;
-    controlBar->addAction(playPauseAction);
-    controlBar->addAction(stopAction);
+    controlBar->addAction(actionPlayPause);
+    controlBar->addAction(actionStop);
+    controlBar->addAction(actionSkipBackward);
+    controlBar->addAction(actionSkipForward);
     controlBar->addWidget(volumeSlider);
     controlBar->addWidget(seekSlider);
+    controlBar->addAction(actionToggleFullscreen);
 
     vLayout = new QVBoxLayout;
     vLayout->addWidget(vp);
@@ -80,7 +96,7 @@ void Player::initGui()
 void Player::loadMedia(const QString &mediaUrl)
 {
     vp->load(mediaUrl);
-    playPauseAction->setEnabled(true);
+    actionPlayPause->setEnabled(true);
 }
 
 void Player::play(const QString &mediaUrl)
@@ -100,23 +116,39 @@ void Player::handlePlayPause()
     } else {
         vp->play();
         changePlayPause(false);
-        stopAction->setEnabled(true);
+        actionStop->setEnabled(true);
     }
 }
 
 void Player::handleStop()
 {
     vp->stop();
+    actionStop->setEnabled(false);
     changePlayPause(true);
 }
 
 void Player::changePlayPause(bool showPlay)
 {
     if (showPlay) {
-        playPauseAction->setIcon(QIcon::fromTheme("media-playback-start"));
-        playPauseAction->setText(tr("Play"));
+        actionPlayPause->setIcon(QIcon::fromTheme("media-playback-start"));
+        actionPlayPause->setText(tr("Play"));
     } else {
-        playPauseAction->setIcon(QIcon::fromTheme("media-playback-pause"));
-        playPauseAction->setText(tr("Play"));
+        actionPlayPause->setIcon(QIcon::fromTheme("media-playback-pause"));
+        actionPlayPause->setText(tr("Pause"));
     }
+}
+
+void Player::setPlayEnabled(bool enabled)
+{
+    actionPlayPause->setEnabled(enabled);
+}
+
+void Player::setSkipBackwardEnabled(bool enabled)
+{
+    actionSkipBackward->setEnabled(enabled);
+}
+
+void Player::setSkipForwardEnabled(bool enabled)
+{
+    actionSkipForward->setEnabled(enabled);
 }

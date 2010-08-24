@@ -75,6 +75,13 @@ void PlaylistWidget::add(const QString &mediaUrl)
     QStringList videoList = playlistModel->stringList();
     videoList << mediaUrl;
     playlistModel->setStringList(videoList);
+
+    QModelIndex currentIndex = playlistView->currentIndex();
+    if (!currentIndex.isValid()) {
+        playlistView->setCurrentIndex(playlistModel->index(0, 0, QModelIndex()));
+    }
+
+    emit playlistChanged();
 }
 
 void PlaylistWidget::add()
@@ -97,6 +104,7 @@ void PlaylistWidget::previousVideo()
     QModelIndex previousVideo = playlistModel->index(currentRow - 1, 0, QModelIndex());
     QString filePath = playlistModel->data(previousVideo, Qt::DisplayRole).toString();
     playlistView->setCurrentIndex(previousVideo);
+    emit playlistChanged();
     emit videoChanged(filePath);
 }
 
@@ -106,12 +114,13 @@ void PlaylistWidget::nextVideo()
 
     QModelIndex currentVideo = playlistView->currentIndex();
     int currentRow = currentVideo.row();
-    if (currentRow >= playlistModel->rowCount())
+    if (currentRow >= playlistModel->rowCount() - 1)
         return;
 
     QModelIndex nextVideo = playlistModel->index(currentRow + 1, 0, QModelIndex());
     QString filePath = playlistModel->data(nextVideo, Qt::DisplayRole).toString();
     playlistView->setCurrentIndex(nextVideo);
+    emit playlistChanged();
     emit videoChanged(filePath);
 }
 
@@ -119,4 +128,30 @@ void PlaylistWidget::fileDoubleClicked(const QModelIndex &index)
 {
     QString filePath = playlistModel->data(index, Qt::DisplayRole).toString();
     emit videoChanged(filePath);
+}
+
+bool PlaylistWidget::hasNext() const
+{
+    int row = playlistView->currentIndex().row();
+    if (row >= playlistModel->rowCount() - 1)
+        return false;
+
+    return true;
+}
+
+bool PlaylistWidget::hasPrevious() const
+{
+    int row = playlistView->currentIndex().row();
+    if (row == 0)
+        return false;
+
+    return true;
+}
+
+bool PlaylistWidget::isEmpty() const
+{
+    if (playlistModel->rowCount() == 0)
+        return true;
+
+    return false;
 }

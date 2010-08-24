@@ -24,6 +24,7 @@ class Player;
 class PlaylistWidget;
 
 class QAction;
+class QDockWidget;
 
 class QuantumPlayer : public QMainWindow
 {
@@ -34,9 +35,11 @@ public:
 signals:
 
 public slots:
+    void changeFullScreen(bool fullScreen);
 
 private slots:
     void handleOpen();
+    void handlePlaylistChange();
 
 private:
     void initGui();
@@ -51,6 +54,7 @@ private:
     QAction *actionQuit;
     QAction *actionAboutQt;
 
+    QDockWidget *playlistDock;
 };
 
 #endif // QUANTUMPLAYER_H

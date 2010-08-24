@@ -34,11 +34,18 @@ Q_OBJECT
 public:
     explicit Player(QWidget *parent = 0);
 
+    void setPlayEnabled(bool enabled);
+    void setSkipBackwardEnabled(bool enabled);
+    void setSkipForwardEnabled(bool enabled);
 
-    QAction *actionPlayPause() const { return playPauseAction; };
-    QAction *actionStop() const { return stopAction; };
+    QAction *playPauseAct() const { return actionPlayPause; };
+    QAction *stopAct() const { return actionStop; };
+
 signals:
+    void skipBackward();
+    void skipForward();
     void playerFinished();
+    void toggleFullScreen(bool fullScreen);
 
 public slots:
     void loadMedia(const QString &mediaUrl);
@@ -57,8 +64,11 @@ private:
 
     Phonon::VideoPlayer *vp;
 
-    QAction *playPauseAction;
-    QAction *stopAction;
+    QAction *actionPlayPause;
+    QAction *actionStop;
+    QAction *actionSkipBackward;
+    QAction *actionSkipForward;
+    QAction *actionToggleFullscreen;
 
     QVBoxLayout *vLayout;
     QToolBar *controlBar;
