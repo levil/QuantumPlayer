@@ -16,6 +16,7 @@
  */
 
 #include <QtGui>
+#include <QSettings>
 
 #include "quantumplayer.h"
 #include "playlistwidget.h"
@@ -28,6 +29,8 @@ QuantumPlayer::QuantumPlayer(QWidget *parent) :
     initGui();
     initMenus();
     initConnections();
+
+    readSettings();
 }
 
 void QuantumPlayer::initGui()
@@ -37,6 +40,7 @@ void QuantumPlayer::initGui()
     setGeometry(100, 100, 800, 600);
 
     playlistDock = new QDockWidget(tr("Playlist"), this);
+    playlistDock->setObjectName("playlistDock");
     playlistDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     playlistWidget = new PlaylistWidget(playlistDock);
     playlistDock->setWidget(playlistWidget);
@@ -115,4 +119,29 @@ void QuantumPlayer::handlePlaylistChange()
     player->setPlayEnabled(!playlistWidget->isEmpty());
     player->setSkipBackwardEnabled(playlistWidget->hasPrevious());
     player->setSkipForwardEnabled(playlistWidget->hasNext());
+}
+
+void QuantumPlayer::closeEvent(QCloseEvent *event)
+{
+    writeSettings();
+    event->accept();
+}
+
+void QuantumPlayer::writeSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MainWindow");
+    settings.setValue("geometry", this->saveGeometry());
+    settings.setValue("windowState", this->saveState());
+    settings.endGroup();
+}
+
+void QuantumPlayer::readSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MainWindow");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
 }

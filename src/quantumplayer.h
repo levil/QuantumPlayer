@@ -41,11 +41,17 @@ private slots:
     void handleOpen();
     void handlePlaylistChange();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private:
     void initGui();
     void initActions();
     void initMenus();
     void initConnections();
+
+    void readSettings();
+    void writeSettings();
 
     Player *player;
     PlaylistWidget *playlistWidget;
