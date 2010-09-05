@@ -6,7 +6,9 @@ INCLUDEPATH += /usr/include/KDE
 SOURCES += main.cpp \
     quantumplayer.cpp \
     player.cpp \
-    playlistwidget.cpp
+    playlistwidget.cpp \
+    qpcore.cpp
 HEADERS += quantumplayer.h \
     player.h \
-    playlistwidget.h
+    playlistwidget.h \
+    qpcore.h

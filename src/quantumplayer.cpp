@@ -21,6 +21,7 @@
 #include "quantumplayer.h"
 #include "playlistwidget.h"
 #include "player.h"
+#include "qpcore.h"
 
 QuantumPlayer::QuantumPlayer(QWidget *parent) :
     QMainWindow(parent)
@@ -31,6 +32,8 @@ QuantumPlayer::QuantumPlayer(QWidget *parent) :
     initConnections();
 
     readSettings();
+
+    QPCore::initialize();
 }
 
 void QuantumPlayer::initGui()
@@ -92,7 +95,8 @@ void QuantumPlayer::initConnections()
 
 void QuantumPlayer::handleOpen()
 {
-    QString fileUrl = QFileDialog::getOpenFileName(this, tr("Open media file"), QDir::homePath());
+    QString fileUrl = QFileDialog::getOpenFileName(this, tr("Open media file"), QDir::homePath(),
+                        QPCore::phononFilter());
 
     if (fileUrl.isNull())
         return;

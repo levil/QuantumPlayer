@@ -23,6 +23,7 @@
 #include <QFileDialog>
 
 #include "playlistwidget.h"
+#include "qpcore.h"
 
 PlaylistWidget::PlaylistWidget(QWidget *parent) :
     QWidget(parent)
@@ -88,7 +89,8 @@ void PlaylistWidget::add()
 {
     QStringList videos = QFileDialog::getOpenFileNames(this,
                                         "Open video files",
-                                        QDir::homePath());
+                                        QDir::homePath(),
+                                        QPCore::phononFilter());
 
     add(videos);
 }
