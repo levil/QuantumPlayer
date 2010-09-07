@@ -7,8 +7,10 @@ SOURCES += main.cpp \
     quantumplayer.cpp \
     player.cpp \
     playlistwidget.cpp \
-    qpcore.cpp
+    qpcore.cpp \
+    playlist.cpp
 HEADERS += quantumplayer.h \
     player.h \
     playlistwidget.h \
-    qpcore.h
+    qpcore.h \
+    playlist.h

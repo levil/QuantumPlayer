@@ -23,6 +23,7 @@
 #include <QFileDialog>
 
 #include "playlistwidget.h"
+#include "playlist.h"
 #include "qpcore.h"
 
 PlaylistWidget::PlaylistWidget(QWidget *parent) :
@@ -53,8 +54,8 @@ void PlaylistWidget::initGui()
     plToolbar->addAction(actionRemove);
 
     playlistView = new QListView;
-    playlistModel = new QStringListModel;
-    playlistView->setModel(playlistModel);
+    playlist = new Playlist;
+    playlistView->setModel(playlist);
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addWidget(plToolbar);
@@ -73,13 +74,11 @@ void PlaylistWidget::add(const QStringList &mediaUrls)
 void PlaylistWidget::add(const QString &mediaUrl)
 {
     actionRemove->setEnabled(true);
-    QStringList videoList = playlistModel->stringList();
-    videoList << mediaUrl;
-    playlistModel->setStringList(videoList);
+    playlist->addVideo(mediaUrl);
 
     QModelIndex currentIndex = playlistView->currentIndex();
     if (!currentIndex.isValid()) {
-        playlistView->setCurrentIndex(playlistModel->index(0, 0, QModelIndex()));
+        playlistView->setCurrentIndex(playlist->index(0, 0, QModelIndex()));
     }
 
     emit playlistChanged();
@@ -103,8 +102,8 @@ void PlaylistWidget::previousVideo()
     if (currentRow - 1 < 0)
         return;
 
-    QModelIndex previousVideo = playlistModel->index(currentRow - 1, 0, QModelIndex());
-    QString filePath = playlistModel->data(previousVideo, Qt::DisplayRole).toString();
+    QModelIndex previousVideo = playlist->index(currentRow - 1, 0, QModelIndex());
+    QString filePath = playlist->data(previousVideo, Qt::UserRole).toString();
     playlistView->setCurrentIndex(previousVideo);
     emit playlistChanged();
     emit videoChanged(filePath);
@@ -116,11 +115,11 @@ void PlaylistWidget::nextVideo()
 
     QModelIndex currentVideo = playlistView->currentIndex();
     int currentRow = currentVideo.row();
-    if (currentRow >= playlistModel->rowCount() - 1)
+    if (currentRow >= playlist->rowCount() - 1)
         return;
 
-    QModelIndex nextVideo = playlistModel->index(currentRow + 1, 0, QModelIndex());
-    QString filePath = playlistModel->data(nextVideo, Qt::DisplayRole).toString();
+    QModelIndex nextVideo = playlist->index(currentRow + 1, 0, QModelIndex());
+    QString filePath = playlist->data(nextVideo, Qt::DisplayRole).toString();
     playlistView->setCurrentIndex(nextVideo);
     emit playlistChanged();
     emit videoChanged(filePath);
@@ -128,14 +127,14 @@ void PlaylistWidget::nextVideo()
 
 void PlaylistWidget::fileDoubleClicked(const QModelIndex &index)
 {
-    QString filePath = playlistModel->data(index, Qt::DisplayRole).toString();
+    QString filePath = playlist->data(index, Qt::UserRole).toString();
     emit videoChanged(filePath);
 }
 
 bool PlaylistWidget::hasNext() const
 {
     int row = playlistView->currentIndex().row();
-    if (row >= playlistModel->rowCount() - 1)
+    if (row >= playlist->rowCount() - 1)
         return false;
 
     return true;
@@ -152,7 +151,7 @@ bool PlaylistWidget::hasPrevious() const
 
 bool PlaylistWidget::isEmpty() const
 {
-    if (playlistModel->rowCount() == 0)
+    if (playlist->rowCount() == 0)
         return true;
 
     return false;

@@ -25,6 +25,8 @@ class QListView;
 class QStringListModel;
 class QModelIndex;
 
+class Playlist;
+
 class PlaylistWidget : public QWidget
 {
 Q_OBJECT
@@ -59,7 +61,7 @@ private:
     QAction *actionRemove;
 
     QListView *playlistView;
-    QStringListModel *playlistModel;
+    Playlist *playlist;
 };
 
 #endif // PLAYLISTWIDGET_H
