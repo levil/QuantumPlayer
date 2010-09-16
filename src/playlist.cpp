@@ -18,6 +18,9 @@
 #include "playlist.h"
 
 #include <QFileInfo>
+#include <QBrush>
+
+#include <QDebug>
 
 Playlist::Playlist(QObject *parent) :
     QAbstractListModel(parent)
@@ -35,6 +38,12 @@ QVariant Playlist::data(const QModelIndex &index, int role) const
         return fileInfo.fileName();
     } else if (role == Qt::UserRole) {
         return filePaths.value(index.row());
+    } else if (role == Qt::BackgroundRole) {
+        if (index.row() == playRow)
+            return QBrush(Qt::lightGray);
+    } else if (role == Qt::ForegroundRole) {
+        if (playedVideos.contains(index))
+            return QBrush(Qt::darkGray);
     }
 
     return QVariant();
@@ -62,9 +71,14 @@ bool Playlist::addVideo(const QString &videoPath)
 {
     int row = filePaths.size();
 
+    if (!firstIndex.isValid())
+        firstIndex = index(0, 0);
+
     beginInsertRows(QModelIndex(), row, row);
     filePaths << videoPath;
     endInsertRows();
+
+    lastIndex = index(rowCount() - 1, 0);
 
     if (playRow == -1) {
         playRow = 0;
@@ -94,8 +108,12 @@ bool Playlist::hasPrevious() const
 
 void Playlist::videoPlayed()
 {
-    if (!nextVideo())
+    playedVideos << index(playRow, 0);
+
+    if (!nextVideo()) {
         playRow = -1;
+        emit dataChanged(firstIndex, lastIndex);
+    }
 }
 
 bool Playlist::nextVideo()
@@ -107,6 +125,7 @@ bool Playlist::nextVideo()
     emit playVideo(filePaths.value(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasPrevious());
+    emit dataChanged(firstIndex, lastIndex);
     return true;
 }
 
@@ -119,6 +138,7 @@ bool Playlist::previousVideo()
     emit playVideo(filePaths.value(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasPrevious());
+    emit dataChanged(firstIndex, lastIndex);
     return true;
 }
 
@@ -128,4 +148,5 @@ void Playlist::playIndex(const QModelIndex &videoIndex)
     emit playVideo(filePaths.value(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasNext());
+    emit dataChanged(firstIndex, lastIndex);
 }

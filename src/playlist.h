@@ -21,6 +21,7 @@
 #include <QAbstractListModel>
 
 #include <QStringList>
+#include <QList>
 
 class Playlist : public QAbstractListModel
 {
@@ -58,6 +59,10 @@ private:
     QStringList filePaths;
 
     int playRow;
+    QModelIndex firstIndex;
+    QModelIndex lastIndex;
+
+    QList<QModelIndex> playedVideos;
 };
 
 #endif // PLAYLIST_H
