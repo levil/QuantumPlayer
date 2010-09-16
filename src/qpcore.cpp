@@ -60,6 +60,12 @@ void initFilter()
         PhononFilter.append(QObject::tr("Windows Media Video (*.wmv);;"));
     }
 
+    if (videoTypes.contains("video/quicktime")) {
+        qDebug("Quicktime support found");
+        allFilter.append("*.mov *.qt");
+        PhononFilter.append(QObject::tr("Quicktime video (*.mov *.qt);;"));
+    }
+
     allFilter.append(");;");
     PhononFilter.prepend(allFilter);
     PhononFilter.append(QObject::tr("All files (*.*)"));
