@@ -39,7 +39,6 @@ public slots:
 
 private slots:
     void handleOpen();
-    void handlePlaylistChange();
 
 protected:
     void closeEvent(QCloseEvent *event);

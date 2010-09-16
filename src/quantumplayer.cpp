@@ -20,6 +20,7 @@
 
 #include "quantumplayer.h"
 #include "playlistwidget.h"
+#include "playlist.h"
 #include "player.h"
 #include "qpcore.h"
 
@@ -83,14 +84,16 @@ void QuantumPlayer::initConnections()
     connect(actionOpen, SIGNAL(triggered()), this, SLOT(handleOpen()));
     connect(actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    connect(playlistWidget, SIGNAL(videoChanged(QString)), player, SLOT(play(QString)));
-    connect(player, SIGNAL(playerFinished()), playlistWidget, SLOT(nextVideo()));
-    connect(player, SIGNAL(skipBackward()), playlistWidget, SLOT(previousVideo()));
-    connect(player, SIGNAL(skipForward()), playlistWidget, SLOT(nextVideo()));
+    Playlist *pl = playlistWidget->playlistModel();
+    connect(pl, SIGNAL(playVideo(QString)), player, SLOT(play(QString)));
+    connect(pl, SIGNAL(loadVideo(QString)), player, SLOT(loadMedia(QString)));
+    connect(pl, SIGNAL(nextVideoStatusChange(bool)), player, SLOT(setSkipForwardEnabled(bool)));
+    connect(pl, SIGNAL(previousVideoStatusChange(bool)), player, SLOT(setSkipBackwardEnabled(bool)));
+    connect(player, SIGNAL(playerFinished()), pl, SLOT(videoPlayed()));
+    connect(player, SIGNAL(skipBackward()), pl, SLOT(previousVideo()));
+    connect(player, SIGNAL(skipForward()), pl, SLOT(nextVideo()));
 
     connect(player, SIGNAL(toggleFullScreen(bool)), this, SLOT(changeFullScreen(bool)));
-
-    connect(playlistWidget, SIGNAL(playlistChanged()), this, SLOT(handlePlaylistChange()));
 }
 
 void QuantumPlayer::handleOpen()
@@ -116,13 +119,6 @@ void QuantumPlayer::changeFullScreen(bool fullScreen)
         showFullScreen();
     else
         showNormal();
-}
-
-void QuantumPlayer::handlePlaylistChange()
-{
-    player->setPlayEnabled(!playlistWidget->isEmpty());
-    player->setSkipBackwardEnabled(playlistWidget->hasPrevious());
-    player->setSkipForwardEnabled(playlistWidget->hasNext());
 }
 
 void QuantumPlayer::closeEvent(QCloseEvent *event)

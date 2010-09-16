@@ -34,9 +34,6 @@ Q_OBJECT
 public:
     explicit Player(QWidget *parent = 0);
 
-    void setPlayEnabled(bool enabled);
-    void setSkipBackwardEnabled(bool enabled);
-    void setSkipForwardEnabled(bool enabled);
 
     QAction *playPauseAct() const { return actionPlayPause; };
     QAction *stopAct() const { return actionStop; };
@@ -50,6 +47,10 @@ signals:
 public slots:
     void loadMedia(const QString &mediaUrl);
     void play(const QString &mediaUrl);
+
+    void setPlayEnabled(bool enabled);
+    void setSkipBackwardEnabled(bool enabled);
+    void setSkipForwardEnabled(bool enabled);
 
 private slots:
     void handlePlayPause();

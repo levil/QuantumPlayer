@@ -35,12 +35,29 @@ public:
 
     bool addVideo(const QString &videoPath);
 
+
+    bool hasNext() const;
+    bool hasPrevious() const;
+
 signals:
+    void loadVideo(const QString &mediaUrl);
+    void playVideo(const QString &mediaUrl);
+
+    void playStatusChange(bool enabled);
+    void nextVideoStatusChange(bool enabled);
+    void previousVideoStatusChange(bool enabled);
 
 public slots:
+    void videoPlayed();
+    bool nextVideo();
+    bool previousVideo();
+
+    void playIndex(const QModelIndex &videoIndex);
 
 private:
     QStringList filePaths;
+
+    int playRow;
 };
 
 #endif // PLAYLIST_H

@@ -37,20 +37,16 @@ public:
     bool hasPrevious() const;
     bool isEmpty() const;
 
+    Playlist* playlistModel() const;
+
 signals:
-    void videoChanged(const QString &mediaUrl);
-    void playlistChanged();
 
 public slots:
     void add(const QStringList &mediaUrls);
     void add(const QString &mediaUrl);
     void add();
 
-    void previousVideo();
-    void nextVideo();
-
 private slots:
-    void fileDoubleClicked(const QModelIndex &index);
 
 private:
     void initGui();

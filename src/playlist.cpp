@@ -22,6 +22,7 @@
 Playlist::Playlist(QObject *parent) :
     QAbstractListModel(parent)
 {
+    playRow = -1;
 }
 
 QVariant Playlist::data(const QModelIndex &index, int role) const
@@ -64,4 +65,67 @@ bool Playlist::addVideo(const QString &videoPath)
     beginInsertRows(QModelIndex(), row, row);
     filePaths << videoPath;
     endInsertRows();
+
+    if (playRow == -1) {
+        playRow = 0;
+        emit loadVideo(filePaths.value(0));
+    }
+
+    emit nextVideoStatusChange(hasNext());
+    emit previousVideoStatusChange(hasPrevious());
+    return true;
+}
+
+bool Playlist::hasNext() const
+{
+    if (playRow == -1 || playRow == filePaths.size() - 1)
+        return false;
+
+    return true;
+}
+
+bool Playlist::hasPrevious() const
+{
+    if (playRow < 1)
+        return false;
+
+    return true;
+}
+
+void Playlist::videoPlayed()
+{
+    if (!nextVideo())
+        playRow = -1;
+}
+
+bool Playlist::nextVideo()
+{
+    if (!hasNext())
+        return false;
+
+    playRow++;
+    emit playVideo(filePaths.value(playRow));
+    emit nextVideoStatusChange(hasNext());
+    emit previousVideoStatusChange(hasPrevious());
+    return true;
+}
+
+bool Playlist::previousVideo()
+{
+    if (!hasPrevious())
+        return false;
+
+    playRow--;
+    emit playVideo(filePaths.value(playRow));
+    emit nextVideoStatusChange(hasNext());
+    emit previousVideoStatusChange(hasPrevious());
+    return true;
+}
+
+void Playlist::playIndex(const QModelIndex &videoIndex)
+{
+    playRow = videoIndex.row();
+    emit playVideo(filePaths.value(playRow));
+    emit nextVideoStatusChange(hasNext());
+    emit previousVideoStatusChange(hasNext());
 }
