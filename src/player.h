@@ -27,6 +27,7 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QAction;
 class QToolBar;
+class QLabel;
 
 class Player : public QWidget
 {
@@ -34,9 +35,9 @@ Q_OBJECT
 public:
     explicit Player(QWidget *parent = 0);
 
-
     QAction *playPauseAct() const { return actionPlayPause; };
     QAction *stopAct() const { return actionStop; };
+    QAction *toggleFullscreenAct() const { return actionToggleFullscreen; };
 
 signals:
     void skipBackward();
@@ -52,9 +53,14 @@ public slots:
     void setSkipBackwardEnabled(bool enabled);
     void setSkipForwardEnabled(bool enabled);
 
+protected:
+    void wheelEvent(QWheelEvent* event);
+
 private slots:
-    void handlePlayPause();
+    void handlePlayPause(bool forcePlay = false);
     void handleStop();
+    void handleTick(qint64 time);
+    void handleTotalTimeChange(qint64 newTotalTime);
 
 private:
     void initConnections();
@@ -62,6 +68,8 @@ private:
     void initGui();
 
     void changePlayPause(bool showPlay);
+
+    QString msToString(qint64 ms); // Format is HH:mm:ss
 
     Phonon::VideoPlayer *vp;
 
@@ -73,6 +81,9 @@ private:
 
     QVBoxLayout *vLayout;
     QToolBar *controlBar;
+
+    QLabel *timeLabel;
+    QString totalTime;
 };
 
 #endif // PLAYER_H

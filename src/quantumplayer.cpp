@@ -60,6 +60,9 @@ void QuantumPlayer::initMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(actionQuit);
 
+    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+    viewMenu->addAction(player->toggleFullscreenAct());
+
     QMenu *playbackMenu = menuBar()->addMenu(tr("&Playback"));
     playbackMenu->addAction(player->playPauseAct());
     playbackMenu->addAction(player->stopAct());

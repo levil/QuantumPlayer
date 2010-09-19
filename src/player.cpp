@@ -20,10 +20,9 @@
 #include <Phonon/SeekSlider>
 #include <Phonon/VolumeSlider>
 
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QToolBar>
-#include <QtGui/QAction>
-#include <QtGui/QIcon>
+#include <QtGui>
+
+#include <QDebug>
 
 #include "player.h"
 
@@ -38,6 +37,8 @@ Player::Player(QWidget *parent) :
 void Player::initConnections()
 {
     connect(vp, SIGNAL(finished()), this, SIGNAL(playerFinished()));
+    connect(vp->mediaObject(), SIGNAL(tick(qint64)), this, SLOT(handleTick(qint64)));
+    connect(vp->mediaObject(), SIGNAL(totalTimeChanged(qint64)), this, SLOT(handleTotalTimeChange(qint64)));
 
     connect(actionPlayPause, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
     connect(actionStop, SIGNAL(triggered()), this, SLOT(handleStop()));
@@ -67,6 +68,7 @@ void Player::initActions()
     actionToggleFullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("Fullscreen"), this);
     actionToggleFullscreen->setCheckable(true);
     actionToggleFullscreen->setChecked(false);
+    actionToggleFullscreen->setShortcut(QKeySequence(Qt::Key_F));
 }
 
 void Player::initGui()
@@ -77,6 +79,9 @@ void Player::initGui()
     Phonon::VolumeSlider *volumeSlider = new Phonon::VolumeSlider(vp->audioOutput());
     volumeSlider->setMaximumWidth(100);
 
+    totalTime = "00:00:00";
+    timeLabel = new QLabel("00:00:00/" + totalTime);
+
     controlBar = new QToolBar;
     controlBar->addAction(actionPlayPause);
     controlBar->addAction(actionStop);
@@ -84,6 +89,7 @@ void Player::initGui()
     controlBar->addAction(actionSkipForward);
     controlBar->addWidget(volumeSlider);
     controlBar->addWidget(seekSlider);
+    controlBar->addWidget(timeLabel);
     controlBar->addAction(actionToggleFullscreen);
 
     vLayout = new QVBoxLayout;
@@ -105,12 +111,12 @@ void Player::play(const QString &mediaUrl)
         handleStop();
 
     loadMedia(mediaUrl);
-    handlePlayPause();
+    handlePlayPause(true);
 }
 
-void Player::handlePlayPause()
+void Player::handlePlayPause(bool forcePlay)
 {
-    if (vp->isPlaying()) {
+    if (vp->isPlaying() && !forcePlay) {
         vp->pause();
         changePlayPause(true);
     } else {
@@ -151,4 +157,42 @@ void Player::setSkipBackwardEnabled(bool enabled)
 void Player::setSkipForwardEnabled(bool enabled)
 {
     actionSkipForward->setEnabled(enabled);
+}
+
+QString Player::msToString(qint64 ms)
+{
+    int totSeconds = ms / 1000;
+    int seconds = totSeconds % 60;
+    int totMinutes = totSeconds / 60;
+    int minutes = totMinutes % 60;
+    int hours = totMinutes / 60;
+
+    return QTime(hours, minutes, seconds).toString("HH:mm:ss");
+}
+
+void Player::handleTick(qint64 time)
+{
+    QString currentTime = msToString(time);
+    timeLabel->setText(currentTime + "/" + totalTime);
+}
+
+void Player::handleTotalTimeChange(qint64 newTotalTime)
+{
+    qDebug() << "Total time in ms: " << newTotalTime;
+    totalTime = msToString(newTotalTime);
+    timeLabel->setText("00:00:00/" + totalTime);
+}
+
+
+void Player::wheelEvent(QWheelEvent *event)
+{
+    if (event->orientation() == Qt::Horizontal) {
+        event->ignore();
+        return;
+    }
+
+    int numSteps = (event->delta() / 8) / 15;
+    vp->seek(vp->currentTime() + 10000*numSteps);
+
+    event->accept();
 }
