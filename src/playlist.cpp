@@ -150,3 +150,17 @@ void Playlist::playIndex(const QModelIndex &videoIndex)
     emit previousVideoStatusChange(hasNext());
     emit dataChanged(firstIndex, lastIndex);
 }
+
+bool Playlist::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (rowCount() <= (row + count - 1))
+        return false;
+
+    beginRemoveRows(QModelIndex(), row, row + count - 1);
+    for (int i = 1; i <= count; i++) {
+        filePaths.removeAt(row);
+    }
+    endRemoveRows();
+
+    return true;
+}

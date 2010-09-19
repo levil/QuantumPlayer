@@ -35,7 +35,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
     bool addVideo(const QString &videoPath);
-
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
     bool hasNext() const;
     bool hasPrevious() const;

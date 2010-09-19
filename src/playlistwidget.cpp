@@ -44,6 +44,8 @@ void PlaylistWidget::initActions()
 void PlaylistWidget::initConnections()
 {
     connect(actionAdd, SIGNAL(triggered()), this, SLOT(add()));
+    connect(actionRemove, SIGNAL(triggered()), this, SLOT(removeCurrentIndex()));
+
     connect(playlistView, SIGNAL(doubleClicked(QModelIndex)), playlist, SLOT(playIndex(QModelIndex)));
 }
 
@@ -56,6 +58,7 @@ void PlaylistWidget::initGui()
     playlistView = new QListView;
     playlist = new Playlist(this);
     playlistView->setModel(playlist);
+    playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addWidget(plToolbar);
@@ -113,4 +116,16 @@ bool PlaylistWidget::isEmpty() const
 Playlist* PlaylistWidget::playlistModel() const
 {
     return playlist;
+}
+
+void PlaylistWidget::removeCurrentIndex()
+{
+    QModelIndex currentIndex = playlistView->currentIndex();
+    if (!currentIndex.isValid())
+        return;
+
+    playlist->removeRow(currentIndex.row());
+
+    if (isEmpty())
+        actionRemove->setEnabled(false);
 }

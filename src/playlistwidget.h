@@ -46,6 +46,8 @@ public slots:
     void add(const QString &mediaUrl);
     void add();
 
+    void removeCurrentIndex();
+
 private slots:
 
 private:
