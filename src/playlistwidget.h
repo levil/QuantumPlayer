@@ -21,7 +21,7 @@
 #include <QWidget>
 
 class QAction;
-class QListView;
+class QTreeView;
 class QStringListModel;
 class QModelIndex;
 
@@ -58,7 +58,7 @@ private:
     QAction *actionAdd;
     QAction *actionRemove;
 
-    QListView *playlistView;
+    QTreeView *playlistView;
     Playlist *playlist;
 };
 

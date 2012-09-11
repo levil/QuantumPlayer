@@ -17,7 +17,7 @@
 
 #include <QAction>
 #include <QToolBar>
-#include <QListView>
+#include <QTreeView>
 #include <QStringListModel>
 #include <QVBoxLayout>
 #include <QFileDialog>
@@ -55,9 +55,12 @@ void PlaylistWidget::initGui()
     plToolbar->addAction(actionAdd);
     plToolbar->addAction(actionRemove);
 
-    playlistView = new QListView;
+    playlistView = new QTreeView;
     playlist = new Playlist(this);
     playlistView->setModel(playlist);
+    playlistView->setItemsExpandable(false);
+    playlistView->setHeaderHidden(false);
+    playlistView->setRootIsDecorated(false);
     playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     QVBoxLayout *vLayout = new QVBoxLayout;

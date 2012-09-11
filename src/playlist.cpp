@@ -19,11 +19,12 @@
 
 #include <QFileInfo>
 #include <QBrush>
+#include <QTime>
 
 #include <QDebug>
 
 Playlist::Playlist(QObject *parent) :
-    QAbstractListModel(parent)
+    QAbstractItemModel(parent)
 {
     playRow = -1;
 }
@@ -35,15 +36,31 @@ QVariant Playlist::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         QFileInfo fileInfo(filePaths.value(index.row()));
-        return fileInfo.fileName();
+        switch (index.column()) {
+            case 0:
+                return fileInfo.fileName();
+            case 1:
+                return QTime(6, 6, 6);
+        }
+
     } else if (role == Qt::UserRole) {
         return filePaths.value(index.row());
+
     } else if (role == Qt::BackgroundRole) {
         if (index.row() == playRow)
             return QBrush(Qt::lightGray);
+
     } else if (role == Qt::ForegroundRole) {
         if (playedVideos.contains(index))
             return QBrush(Qt::darkGray);
+
+    } else if (role == Qt::TextAlignmentRole) {
+        switch (index.column()) {
+            case 0:
+                return Qt::AlignLeft;
+            case 1:
+                return Qt::AlignRight;
+        }
     }
 
     return QVariant();
@@ -56,7 +73,25 @@ Qt::ItemFlags Playlist::flags(const QModelIndex &index) const
 
 QVariant Playlist::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        switch (section) {
+            case 0:
+                return tr("Filename");
+            case 1:
+                return tr("Length");
+        }
+    }
     return QVariant();
+}
+
+QModelIndex Playlist::index(int row, int column, const QModelIndex &parent) const
+{
+    return createIndex(row, column);
+}
+
+QModelIndex Playlist::parent(const QModelIndex &child) const
+{
+    return QModelIndex();
 }
 
 int Playlist::rowCount(const QModelIndex &parent) const
@@ -65,6 +100,11 @@ int Playlist::rowCount(const QModelIndex &parent) const
         return 0;
     else
         return filePaths.size();
+}
+
+int Playlist::columnCount(const QModelIndex &parent) const
+{
+    return 2;
 }
 
 bool Playlist::addVideo(const QString &videoPath)

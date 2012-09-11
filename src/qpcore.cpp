@@ -18,6 +18,7 @@
 #include "qpcore.h"
 
 #include <QtCore>
+#include <QDebug>
 #include <Phonon/BackendCapabilities>
 
 QString PhononFilter;
@@ -27,6 +28,11 @@ void initFilter()
     QString allFilter(QObject::tr("All multimedia files ("));;
     QStringList mimeTypes = Phonon::BackendCapabilities::availableMimeTypes();
     QStringList videoTypes = mimeTypes.filter("video");
+
+    qDebug("Following video mime-types were found:");
+    QStringList::const_iterator videoTypeIterator;
+    for (videoTypeIterator = videoTypes.constBegin(); videoTypeIterator != videoTypes.constEnd(); ++videoTypeIterator)
+        qDebug() << *videoTypeIterator;
 
     if (videoTypes.contains("video/x-msvideo") || videoTypes.contains("video/msvideo")
         || videoTypes.contains("video/avi")) {
@@ -54,7 +60,8 @@ void initFilter()
         PhononFilter.append(QObject::tr("Ogg files (*.ogg *.ogv);;"));
     }
 
-    if (videoTypes.contains("video/x-ms-wmv")) {
+    if (videoTypes.contains("video/x-ms-wmv") ||
+            videoTypes.contains("video/x-wmv")) {
         qDebug("Windows Media Video support found");
         allFilter.append("*.wmv ");
         PhononFilter.append(QObject::tr("Windows Media Video (*.wmv);;"));
