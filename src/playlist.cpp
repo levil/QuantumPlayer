@@ -1,5 +1,5 @@
 /* QuantumPlayer - Qt and Phonon based multimedia player
- * Copyright (C) 2010  Ville Leskinen
+ * Copyright (C) 2010-2012  Ville Leskinen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <QFileInfo>
 #include <QBrush>
 #include <QTime>
+#include <QtAlgorithms>
 
 #include <QDebug>
 
@@ -29,22 +30,29 @@ Playlist::Playlist(QObject *parent) :
     playRow = -1;
 }
 
+Playlist::~Playlist()
+{
+    qDeleteAll(playlistVideos);
+    playlistVideos.clear();
+}
+
 QVariant Playlist::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        QFileInfo fileInfo(filePaths.value(index.row()));
+        //QFileInfo fileInfo(filePaths.value(index.row()));
+        Video* v = playlistVideos.at(index.row());
         switch (index.column()) {
             case 0:
-                return fileInfo.fileName();
+                return v->name();
             case 1:
-                return QTime(6, 6, 6);
+                return v->totalTimeString();
         }
 
     } else if (role == Qt::UserRole) {
-        return filePaths.value(index.row());
+        return videoPathAt(index.row());
 
     } else if (role == Qt::BackgroundRole) {
         if (index.row() == playRow)
@@ -66,7 +74,7 @@ QVariant Playlist::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags Playlist::flags(const QModelIndex &index) const
+Qt::ItemFlags Playlist::flags(const QModelIndex &/*index*/) const
 {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
@@ -84,12 +92,12 @@ QVariant Playlist::headerData(int section, Qt::Orientation orientation, int role
     return QVariant();
 }
 
-QModelIndex Playlist::index(int row, int column, const QModelIndex &parent) const
+QModelIndex Playlist::index(int row, int column, const QModelIndex &/*parent*/) const
 {
     return createIndex(row, column);
 }
 
-QModelIndex Playlist::parent(const QModelIndex &child) const
+QModelIndex Playlist::parent(const QModelIndex &/*child*/) const
 {
     return QModelIndex();
 }
@@ -99,30 +107,30 @@ int Playlist::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
     else
-        return filePaths.size();
+        return playlistVideos.size();
 }
 
-int Playlist::columnCount(const QModelIndex &parent) const
+int Playlist::columnCount(const QModelIndex &/*parent*/) const
 {
     return 2;
 }
 
 bool Playlist::addVideo(const QString &videoPath)
 {
-    int row = filePaths.size();
+    int row = playlistVideos.size();
 
     if (!firstIndex.isValid())
         firstIndex = index(0, 0);
 
     beginInsertRows(QModelIndex(), row, row);
-    filePaths << videoPath;
+    playlistVideos.append(new Video(videoPath));
     endInsertRows();
 
     lastIndex = index(rowCount() - 1, 0);
 
     if (playRow == -1) {
         playRow = 0;
-        emit loadVideo(filePaths.value(0));
+        emit loadVideo(videoPathAt(0));
     }
 
     emit nextVideoStatusChange(hasNext());
@@ -132,7 +140,7 @@ bool Playlist::addVideo(const QString &videoPath)
 
 bool Playlist::hasNext() const
 {
-    if (playRow == -1 || playRow == filePaths.size() - 1)
+    if (playRow == -1 || playRow == playlistVideos.size() - 1)
         return false;
 
     return true;
@@ -162,7 +170,7 @@ bool Playlist::nextVideo()
         return false;
 
     playRow++;
-    emit playVideo(filePaths.value(playRow));
+    emit playVideo(videoPathAt(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasPrevious());
     emit dataChanged(firstIndex, lastIndex);
@@ -175,7 +183,7 @@ bool Playlist::previousVideo()
         return false;
 
     playRow--;
-    emit playVideo(filePaths.value(playRow));
+    emit playVideo(videoPathAt(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasPrevious());
     emit dataChanged(firstIndex, lastIndex);
@@ -185,22 +193,29 @@ bool Playlist::previousVideo()
 void Playlist::playIndex(const QModelIndex &videoIndex)
 {
     playRow = videoIndex.row();
-    emit playVideo(filePaths.value(playRow));
+    emit playVideo(videoPathAt(playRow));
     emit nextVideoStatusChange(hasNext());
     emit previousVideoStatusChange(hasNext());
     emit dataChanged(firstIndex, lastIndex);
 }
 
-bool Playlist::removeRows(int row, int count, const QModelIndex &parent)
+bool Playlist::removeRows(int row, int count, const QModelIndex &/*parent*/)
 {
     if (rowCount() <= (row + count - 1))
         return false;
 
     beginRemoveRows(QModelIndex(), row, row + count - 1);
     for (int i = 1; i <= count; i++) {
-        filePaths.removeAt(row);
+        Video *v = playlistVideos.takeAt(row);
+        delete v;
     }
     endRemoveRows();
 
     return true;
+}
+
+QString Playlist::videoPathAt(int index) const
+{
+    Video *v = playlistVideos.at(index);
+    return v->path();
 }

@@ -1,5 +1,5 @@
 /* QuantumPlayer - Qt and Phonon based multimedia player
- * Copyright (C) 2010  Ville Leskinen
+ * Copyright (C) 2010-2012  Ville Leskinen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 QuantumPlayer::QuantumPlayer(QWidget *parent) :
     QMainWindow(parent)
 {
-    initActions();
     initGui();
+    initActions();
     initMenus();
     initConnections();
 
@@ -61,6 +61,7 @@ void QuantumPlayer::initMenus()
     fileMenu->addAction(actionQuit);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+    viewMenu->addAction(actionViewPlaylist);
     viewMenu->addAction(player->toggleFullscreenAct());
 
     QMenu *playbackMenu = menuBar()->addMenu(tr("&Playback"));
@@ -77,6 +78,8 @@ void QuantumPlayer::initActions()
     actionOpen->setShortcut(QKeySequence::Open);
     actionQuit = new QAction(QIcon::fromTheme("application-exit"), tr("&Quit"), this);
     actionQuit->setShortcut(QKeySequence::Quit);
+
+    actionViewPlaylist = playlistDock->toggleViewAction();
 
     actionAboutQt = new QAction(tr("About &Qt"), this);
 }

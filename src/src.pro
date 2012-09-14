@@ -8,9 +8,11 @@ SOURCES += main.cpp \
     player.cpp \
     playlistwidget.cpp \
     qpcore.cpp \
-    playlist.cpp
+    playlist.cpp \
+    video.cpp
 HEADERS += quantumplayer.h \
     player.h \
     playlistwidget.h \
     qpcore.h \
-    playlist.h
+    playlist.h \
+    video.h

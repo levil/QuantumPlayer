@@ -1,5 +1,5 @@
 /* QuantumPlayer - Qt and Phonon based multimedia player
- * Copyright (C) 2010  Ville Leskinen
+ * Copyright (C) 2010-2012  Ville Leskinen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,17 @@
 #include <QStringList>
 #include <QList>
 
+#include "video.h"
+
 class Playlist : public QAbstractItemModel
 {
 Q_OBJECT
 public:
     explicit Playlist(QObject *parent = 0);
+    ~Playlist();
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
+    Qt::ItemFlags flags(const QModelIndex &) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &child) const;
@@ -59,7 +62,10 @@ public slots:
     void playIndex(const QModelIndex &videoIndex);
 
 private:
+    QString videoPathAt(int index) const;
+
     QStringList filePaths;
+    QList<Video*> playlistVideos;
 
     int playRow;
     QModelIndex firstIndex;
