@@ -49,6 +49,7 @@ public slots:
     void removeCurrentIndex();
 
 private slots:
+    void playlistContextMenu(const QPoint &pos);
 
 private:
     void initGui();

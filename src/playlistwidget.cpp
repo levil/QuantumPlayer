@@ -21,6 +21,9 @@
 #include <QStringListModel>
 #include <QVBoxLayout>
 #include <QFileDialog>
+#include <QMenu>
+
+#include <QDebug>
 
 #include "playlistwidget.h"
 #include "playlist.h"
@@ -47,6 +50,7 @@ void PlaylistWidget::initConnections()
     connect(actionRemove, SIGNAL(triggered()), this, SLOT(removeCurrentIndex()));
 
     connect(playlistView, SIGNAL(doubleClicked(QModelIndex)), playlist, SLOT(playIndex(QModelIndex)));
+    connect(playlistView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(playlistContextMenu(QPoint)));
 }
 
 void PlaylistWidget::initGui()
@@ -62,6 +66,7 @@ void PlaylistWidget::initGui()
     playlistView->setHeaderHidden(false);
     playlistView->setRootIsDecorated(false);
     playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
+    playlistView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addWidget(plToolbar);
@@ -131,4 +136,16 @@ void PlaylistWidget::removeCurrentIndex()
 
     if (isEmpty())
         actionRemove->setEnabled(false);
+}
+
+void PlaylistWidget::playlistContextMenu(const QPoint &pos)
+{
+    QModelIndex menuIndex = playlistView->indexAt(pos);
+    QMenu contextMenu(playlistView);
+    contextMenu.addAction(actionAdd);
+    if (menuIndex.isValid()) {
+        contextMenu.addAction(actionRemove);
+    }
+
+    contextMenu.exec(playlistView->mapToGlobal(pos), actionAdd);
 }
