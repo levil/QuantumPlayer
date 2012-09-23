@@ -18,6 +18,8 @@
 #define PLAYER_H
 
 #include <QWidget>
+#include <QList>
+#include <QIcon>
 
 namespace Phonon {
     class VideoPlayer;
@@ -28,16 +30,24 @@ class QVBoxLayout;
 class QAction;
 class QToolBar;
 class QLabel;
+class QSlider;
 
 class Player : public QWidget
 {
 Q_OBJECT
 public:
+    enum VolumeIcon {
+        IconVolMuted = 0,
+        IconVolLow = 1,
+        IconVolMedium = 2,
+        IconVolHigh = 3
+    };
+
     explicit Player(QWidget *parent = 0);
 
-    QAction *playPauseAct() const { return actionPlayPause; };
-    QAction *stopAct() const { return actionStop; };
-    QAction *toggleFullscreenAct() const { return actionToggleFullscreen; };
+    QAction *playPauseAct() const { return actionPlayPause; }
+    QAction *stopAct() const { return actionStop; }
+    QAction *toggleFullscreenAct() const { return actionToggleFullscreen; }
 
 signals:
     void skipBackward();
@@ -62,6 +72,11 @@ private slots:
     void handleTick(qint64 time);
     void handleTotalTimeChange(qint64 newTotalTime);
 
+    void handleVolumeSliderMove(int value);
+    void handleMuteButtonToggle(bool checked);
+
+    void changeFullScreen(bool fullScreen);
+
 private:
     void initConnections();
     void initActions();
@@ -77,10 +92,15 @@ private:
     QAction *actionStop;
     QAction *actionSkipBackward;
     QAction *actionSkipForward;
+    QAction *actionMute;
     QAction *actionToggleFullscreen;
 
     QVBoxLayout *vLayout;
     QToolBar *controlBar;
+
+    QSlider *volumeSlider;
+    QList<QIcon> volumeIcons;
+    int oldVolume;
 
     QLabel *timeLabel;
     QString totalTime;

@@ -51,6 +51,7 @@ void QuantumPlayer::initGui()
     addDockWidget(Qt::LeftDockWidgetArea, playlistDock);
 
     setWindowTitle(qApp->applicationName());
+    playlistWasVisible = false;
 }
 
 void QuantumPlayer::initMenus()
@@ -120,11 +121,14 @@ void QuantumPlayer::handleOpen()
 void QuantumPlayer::changeFullScreen(bool fullScreen)
 {
     menuBar()->setVisible(!fullScreen);
-    playlistDock->setVisible(!fullScreen);
-    if (fullScreen)
+    if (fullScreen) {
+        playlistWasVisible = playlistDock->isVisible();
+        playlistDock->setVisible(false);
         showFullScreen();
-    else
+    } else {
         showNormal();
+        playlistDock->setVisible(playlistWasVisible);
+    }
 }
 
 void QuantumPlayer::closeEvent(QCloseEvent *event)

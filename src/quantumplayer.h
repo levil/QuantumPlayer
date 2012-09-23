@@ -61,6 +61,8 @@ private:
     QAction *actionAboutQt;
 
     QDockWidget *playlistDock;
+
+    bool playlistWasVisible;
 };
 
 #endif // QUANTUMPLAYER_H

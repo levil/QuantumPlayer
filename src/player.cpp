@@ -18,7 +18,7 @@
 #include <Phonon/MediaSource>
 #include <Phonon/MediaObject>
 #include <Phonon/SeekSlider>
-#include <Phonon/VolumeSlider>
+#include <Phonon/AudioOutput>
 
 #include <QtGui>
 
@@ -42,9 +42,13 @@ void Player::initConnections()
 
     connect(actionPlayPause, SIGNAL(triggered()), this, SLOT(handlePlayPause()));
     connect(actionStop, SIGNAL(triggered()), this, SLOT(handleStop()));
+    connect(actionMute, SIGNAL(toggled(bool)), this, SLOT(handleMuteButtonToggle(bool)));
     connect(actionToggleFullscreen, SIGNAL(toggled(bool)), this, SIGNAL(toggleFullScreen(bool)));
+    connect(this, SIGNAL(toggleFullScreen(bool)), this, SLOT(changeFullScreen(bool)));
     connect(actionSkipBackward, SIGNAL(triggered()), this, SIGNAL(skipBackward()));
     connect(actionSkipForward, SIGNAL(triggered()), this, SIGNAL(skipForward()));
+
+    connect(volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(handleVolumeSliderMove(int)));
 }
 
 void Player::initActions()
@@ -65,6 +69,9 @@ void Player::initActions()
     actionSkipForward = new QAction(QIcon::fromTheme("media-skip-forward"), tr("Skip forward"), this);
     actionSkipForward->setEnabled(false);
 
+    actionMute = new QAction(QIcon::fromTheme("audio-volume-medium"), tr("Mute"), this);
+    actionMute->setCheckable(true);
+
     actionToggleFullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("Fullscreen"), this);
     actionToggleFullscreen->setCheckable(true);
     actionToggleFullscreen->setChecked(false);
@@ -73,11 +80,30 @@ void Player::initActions()
 
 void Player::initGui()
 {
+    volumeIcons << QIcon::fromTheme("audio-volume-muted")
+                << QIcon::fromTheme("audio-volume-low")
+                << QIcon::fromTheme("audio-volume-medium")
+                << QIcon::fromTheme("audio-volume-high");
     vp = new Phonon::VideoPlayer(Phonon::VideoCategory);
 
     Phonon::SeekSlider *seekSlider = new Phonon::SeekSlider(vp->mediaObject());
-    Phonon::VolumeSlider *volumeSlider = new Phonon::VolumeSlider(vp->audioOutput());
+    //Phonon::VolumeSlider *volumeSlider = new Phonon::VolumeSlider(vp->audioOutput());
+    //volumeSlider->setMaximumWidth(100);
+
+    volumeSlider = new QSlider(Qt::Horizontal);
+    volumeSlider->setRange(0, 100);
     volumeSlider->setMaximumWidth(100);
+    int volumeValue = (int)(vp->audioOutput()->volume()*100);
+    volumeSlider->setSliderPosition((int)(volumeValue));
+    if (volumeValue <= 0) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolMuted));
+    } else if (volumeValue < 33) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolLow));
+    } else if (volumeValue < 66) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolMedium));
+    } else {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolHigh));
+    }
 
     totalTime = "00:00:00";
     timeLabel = new QLabel("00:00:00/" + totalTime);
@@ -87,6 +113,7 @@ void Player::initGui()
     controlBar->addAction(actionStop);
     controlBar->addAction(actionSkipBackward);
     controlBar->addAction(actionSkipForward);
+    controlBar->addAction(actionMute);
     controlBar->addWidget(volumeSlider);
     controlBar->addWidget(seekSlider);
     controlBar->addWidget(timeLabel);
@@ -195,4 +222,51 @@ void Player::wheelEvent(QWheelEvent *event)
     vp->seek(vp->currentTime() + 10000*numSteps);
 
     event->accept();
+}
+
+void Player::changeFullScreen(bool fullScreen)
+{
+    if (fullScreen)
+        showFullScreen();
+    else
+        showNormal();
+}
+
+void Player::handleVolumeSliderMove(int value)
+{
+    if (value <= 0) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolMuted));
+    } else if (value < 33) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolLow));
+    } else if (value < 66) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolMedium));
+    } else
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolHigh));
+
+    vp->audioOutput()->setVolume((qreal)value/100);
+    qDebug() << "Volume is now: " << vp->audioOutput()->volume();
+}
+
+void Player::handleMuteButtonToggle(bool checked)
+{
+    if (checked) {
+        actionMute->setIcon(volumeIcons.at((int)Player::IconVolMuted));
+        oldVolume = volumeSlider->value();
+    } else {
+        if (oldVolume <= 0) {
+            actionMute->setIcon(volumeIcons.at((int)Player::IconVolMuted));
+        } else if (oldVolume < 33) {
+            actionMute->setIcon(volumeIcons.at((int)Player::IconVolLow));
+        } else if (oldVolume < 66) {
+            actionMute->setIcon(volumeIcons.at((int)Player::IconVolMedium));
+        } else
+            actionMute->setIcon(volumeIcons.at((int)Player::IconVolHigh));
+
+        vp->audioOutput()->setVolume((qreal)oldVolume/100);
+    }
+
+    vp->audioOutput()->setMuted(checked);
+    volumeSlider->setEnabled(!checked);
+
+    qDebug() << "Volume is now: " << vp->audioOutput()->volume();
 }
